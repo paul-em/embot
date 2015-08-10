@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<h1></h1>
+<label>manual control<input type="checkbox"></label>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        var $input = document.querySelector('input');
+        $input.addEventListener('change', function(){
+            console.log('change', this.checked);
+
+        })
+    });
+</script>
+</body>
+</html>
