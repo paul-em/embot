@@ -9,11 +9,47 @@
 <label>manual control<input type="checkbox"></label>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function(event) {
+    var msgs = ['EmBot is in auto mode', 'You are controlling EmBot now!'];
+    document.addEventListener("DOMContentLoaded", function (event) {
+        var manual = false;
+        var socket = io.connect();
+        socket.on('connect', function () {
+            console.log('connected');
+        });
         var $input = document.querySelector('input');
-        $input.addEventListener('change', function(){
-            console.log('change', this.checked);
+        var $h1 = document.querySelector('h1');
+        $h1.innerText = msgs[0];
+        $input.addEventListener('change', function () {
+            manual = this.checked;
+            socket.emit('ctrl-change', manual);
+            if (this.checked) {
+                $h1.innerText = msgs[1];
+            } else {
+                $h1.innerText = msgs[0];
+            }
+        });
 
+        document.addEventListener('keydown', function (e) {
+            if (manual) {
+                switch (e.which) {
+                    case 37:
+                        console.log('left');
+                        socket.emit('ctrl', 'left');
+                        break;
+                    case 38:
+                        console.log('up');
+                        socket.emit('ctrl', 'up');
+                        break;
+                    case 39:
+                        console.log('right');
+                        socket.emit('ctrl', 'right');
+                        break;
+                    case 40:
+                        console.log('down');
+                        socket.emit('ctrl', 'down');
+                        break;
+                }
+            }
         })
     });
 </script>
