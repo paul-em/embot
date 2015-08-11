@@ -25,20 +25,18 @@ board.on("ready", function () {
     rightMotor = new five.Motor(motorConfigs.M2);
     var ping = new five.Ping(2);
 
-  /*  var ping = new five.Proximity({
-        controller: "HCSR04",
-        pin: 2,
-        freq: 500
-    });*/
+    /*  var ping = new five.Proximity({
+     controller: "HCSR04",
+     pin: 2,
+     freq: 500
+     });*/
     servo.center();
     leftMotor.forward(255);
     rightMotor.forward(255);
     ping.on("change", pingData);
     sweep();
-    setInterval(steer, 500);
-
-    function steer(){
-        if(manual){
+    this.loop(500, function () {
+        if (manual) {
             return;
         }
         var closest = getClosest();
@@ -94,21 +92,20 @@ board.on("ready", function () {
                 }
             }
         }
-    }
+    });
 
     function sweep() {
-        if(manual){
-            return;
+        if (!manual) {
+            if (lookingAt === SERVO_MIN_DEG || (sweepDir === UP && lookingAt !== SERVO_MAX_DEG)) {
+                lookingAt += SERVO_STEPS;
+                sweepDir = UP;
+            } else {
+                lookingAt -= SERVO_STEPS;
+                sweepDir = DOWN;
+            }
+            servo.to(lookingAt);
         }
-        if (lookingAt === SERVO_MIN_DEG || (sweepDir === UP && lookingAt !== SERVO_MAX_DEG)) {
-            lookingAt += SERVO_STEPS;
-            sweepDir = UP;
-        } else {
-            lookingAt -= SERVO_STEPS;
-            sweepDir = DOWN;
-        }
-        servo.to(lookingAt);
-        setTimeout(sweep, SERVO_TIME);
+        board.wait(SERVO_TIME, sweep);
     }
 
     function getFurthest() {
@@ -149,8 +146,8 @@ board.on("ready", function () {
         }
     }
 
-    function pingData(){
-        if(manual){
+    function pingData() {
+        if (manual) {
             return;
         }
         if (this.cm < 1000 && this.cm > 1) {
@@ -162,38 +159,35 @@ board.on("ready", function () {
     }
 });
 
-module.ctrlChange = function(_manual){
+exports.ctrlChange = function (_manual) {
     manual = _manual;
-    if(manual){
-        leftMotor.forward(0);
-        rightMotor.forward(0);
-    }
+    leftMotor.forward(0);
+    rightMotor.forward(0);
 };
 
 var timeout;
-module.ctrl = function(dir){
+exports.ctrl = function (dirs) {
     clearTimeout(timeout);
-    switch(dir){
-        case 'left':
-            leftMotor.forward(0);
-            rightMotor.forward(255);
-            break;
-        case 'up':
-            leftMotor.forward(255);
-            rightMotor.forward(255);
-            break;
-        case 'right':
-            leftMotor.forward(255);
-            rightMotor.forward(0);
-            break;
-        case 'down':
-            leftMotor.reverse(255);
-            rightMotor.reverse(255);
-            break;
-    }
-    timeout = setTimeout(function(){
+    if (dirs.up && dirs.left) {
+        leftMotor.forward(150);
+        rightMotor.forward(255);
+    } else if (dirs.up && dirs.right) {
+        leftMotor.forward(255);
+        rightMotor.forward(150);
+    } else if (dirs.up) {
+        leftMotor.forward(255);
+        rightMotor.forward(255);
+    } else if (dirs.down && dirs.left) {
+        leftMotor.reverse(150);
+        rightMotor.reverse(255);
+    } else if (dirs.down && dirs.right) {
+        leftMotor.reverse(255);
+        rightMotor.reverse(150);
+    } else if (dirs.down) {
+        leftMotor.reverse(255);
+        rightMotor.reverse(255);
+    } else {
         leftMotor.forward(0);
         rightMotor.forward(0);
-    }, 200);
-
+    }
 };

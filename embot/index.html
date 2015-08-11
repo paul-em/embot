@@ -24,33 +24,46 @@
             socket.emit('ctrl-change', manual);
             if (this.checked) {
                 $h1.innerText = msgs[1];
+                sendData();
             } else {
                 $h1.innerText = msgs[0];
             }
         });
 
+        var map = {
+            37: 'left',
+            38: 'up',
+            39: 'right',
+            40: 'down'
+        };
+        var keysPressed = {
+            left: false,
+            up: false,
+            right: false,
+            down: false
+        };
+
+
+
         document.addEventListener('keydown', function (e) {
-            if (manual) {
-                switch (e.which) {
-                    case 37:
-                        console.log('left');
-                        socket.emit('ctrl', 'left');
-                        break;
-                    case 38:
-                        console.log('up');
-                        socket.emit('ctrl', 'up');
-                        break;
-                    case 39:
-                        console.log('right');
-                        socket.emit('ctrl', 'right');
-                        break;
-                    case 40:
-                        console.log('down');
-                        socket.emit('ctrl', 'down');
-                        break;
-                }
+            if(map[e.which]){
+                keysPressed[map[e.which]] = true;
+                sendData();
             }
-        })
+        });
+        document.addEventListener('keyup', function (e) {
+            if(map[e.which]){
+                keysPressed[map[e.which]] = false;
+                sendData();
+            }
+        });
+
+        function sendData(){
+            if (manual) {
+                console.log(keysPressed);
+                socket.emit('ctrl', keysPressed);
+            }
+        }
     });
 </script>
 </body>
