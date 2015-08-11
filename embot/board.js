@@ -159,6 +159,10 @@ board.on("ready", function () {
     }
 });
 
+exports.getSonarData = function(){
+    return map;
+};
+
 exports.ctrlChange = function (_manual) {
     manual = _manual;
     leftMotor.forward(0);

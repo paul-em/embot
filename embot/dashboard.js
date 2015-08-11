@@ -19,6 +19,17 @@ io.on('connection', function(socket){
         console.log('ctrl change', data);
         board.ctrl(data);
     });
+
+    var interval = setInterval(function(){
+        socket.emit('data', {
+            sonar: board.getSonarData()
+        });
+    }, 200);
+
+    socket.on('disconnect', function(){
+        board.ctrlChange(false);
+        clearInterval(interval);
+    });
 });
 
 
