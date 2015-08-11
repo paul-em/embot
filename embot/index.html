@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1></h1>
-<label>manual control<input type="checkbox"></label>
+<span>use arrow keys to control the robot</span>
 <script src="/socket.io/socket.io.js"></script>
 <script>
     var msgs = ['EmBot is in auto mode', 'You are controlling EmBot now!'];
@@ -16,19 +16,10 @@
         socket.on('connect', function () {
             console.log('connected');
         });
-        var $input = document.querySelector('input');
+
         var $h1 = document.querySelector('h1');
         $h1.innerText = msgs[0];
-        $input.addEventListener('change', function () {
-            manual = this.checked;
-            socket.emit('ctrl-change', manual);
-            if (this.checked) {
-                $h1.innerText = msgs[1];
-                sendData();
-            } else {
-                $h1.innerText = msgs[0];
-            }
-        });
+
 
         var map = {
             37: 'left',
@@ -47,6 +38,9 @@
 
         document.addEventListener('keydown', function (e) {
             if(map[e.which]){
+                if(!manual){
+                    changeCtrl(true);
+                }
                 keysPressed[map[e.which]] = true;
                 sendData();
             }
@@ -58,10 +52,34 @@
             }
         });
 
+        var timeout;
         function sendData(){
             if (manual) {
+                clearTimeout(timeout);
                 console.log(keysPressed);
                 socket.emit('ctrl', keysPressed);
+                timeout = setTimeout(function(){
+                    var somethingPressed = false;
+                    for(var i in keysPressed){
+                        if(keysPressed[i]){
+                            somethingPressed = true;
+                            break;
+                        }
+                    }
+                    if(!somethingPressed){
+                        changeCtrl(false);
+                    }
+                }, 2000);
+            }
+        }
+
+        function changeCtrl(_manual){
+            manual = _manual;
+            socket.emit('ctrl-change', manual);
+            if (manual) {
+                $h1.innerText = msgs[1];
+            } else {
+                $h1.innerText = msgs[0];
             }
         }
     });

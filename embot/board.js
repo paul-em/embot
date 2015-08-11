@@ -186,6 +186,12 @@ exports.ctrl = function (dirs) {
     } else if (dirs.down) {
         leftMotor.reverse(255);
         rightMotor.reverse(255);
+    } else if(dirs.left) {
+        leftMotor.reverse(255);
+        rightMotor.forward(255);
+    } else if(dirs.right) {
+        leftMotor.forward(255);
+        rightMotor.reverse(255);
     } else {
         leftMotor.forward(0);
         rightMotor.forward(0);
