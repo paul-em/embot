@@ -42,17 +42,14 @@
 <span>use arrow keys to control the robot</span>
 
 <div id="radar">
-    <div class="deg30"></div>
     <div class="deg60"></div>
     <div class="deg90"></div>
     <div class="deg120"></div>
-    <div class="deg150"></div>
 </div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
     var msgs = ['EmBot is in auto mode', 'You are controlling EmBot now!'];
     document.addEventListener("DOMContentLoaded", function (event) {
-        var degs = [150, 120, 90, 60, 30];
         var $h1 = document.querySelector('h1');
         var $h2 = document.querySelector('h2');
         var $radarElements = document.querySelectorAll('#radar div');
@@ -69,19 +66,17 @@
         });
         socket.on('data', function (data) {
             console.log('data', data);
-            for (var i in data.sonar) {
-                var index = parseInt(i);
-                var item = data.sonar[index];
-
+            data.sonar.forEach(function (item, index) {
                 if (item) {
-                    $radarElements[degs.indexOf(index)].style.height = item + 'px';
+                    index = parseInt(index);
+                    $radarElements[index].style.height = item + 'px';
                     if (item < 30) {
-                        $radarElements[degs.indexOf(index)].style.backgroundColor = 'red';
+                        $radarElements[index].style.backgroundColor = 'red';
                     } else {
-                        $radarElements[degs.indexOf(index)].style.backgroundColor = 'grey';
+                        $radarElements[index].style.backgroundColor = 'grey';
                     }
                 }
-            }
+            });
         });
         $h1.innerText = msgs[0];
 
@@ -112,7 +107,7 @@
         };
 
         document.addEventListener('keydown', function (e) {
-            if(sounds[e.which]){
+            if (sounds[e.which]) {
                 socket.emit('playSound', sounds[e.which]);
             }
             if (map[e.which]) {

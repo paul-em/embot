@@ -12,10 +12,10 @@ gulp.task('u', function(){
         .pipe(sftp(credentials.second))
 });
 
-gulp.task('watch', function(){
+gulp.task('watch', ['default'], function(){
     return gulp.watch('embot/*.*', ['default'])
 });
 
-gulp.task('watchu', function(){
+gulp.task('watchu',['u'], function(){
     return gulp.watch('embot/*.*', ['u'])
 });

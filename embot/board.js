@@ -1,5 +1,4 @@
 var five = require("johnny-five");
-var play = require('./play');
 var board = new five.Board();
 
 var drive = true;
@@ -39,7 +38,7 @@ board.on("ready", function () {
      });*/
     //ping.on("data", pingData);
 
-    function steer() {
+    function autoSteer() {
         if (manual) {
             return;
         }
@@ -156,8 +155,10 @@ function go(left, right) {
     }
 }
 
-exports.getSonarData = function () {
-    return map;
+exports.getData = function () {
+    return {
+        sonar: map
+    };
 };
 
 

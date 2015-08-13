@@ -11,7 +11,7 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
     console.log('a user connected');
-
+    var dataInterval;
     socket.on('steer', function(data){
         board.steer(data);
     });
@@ -23,6 +23,10 @@ io.on('connection', function(socket){
     socket.on('disconnect', function(){
         console.log('a user disconnected');
     });
+
+    dataInterval = setInterval(function(){
+        socket.emit('data', board.getData());
+    }, 500);
 });
 
 
