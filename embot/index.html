@@ -21,12 +21,15 @@
         .deg30 {
             transform: rotate(-60deg);
         }
+
         .deg60 {
             transform: rotate(-30deg);
         }
+
         .deg120 {
             transform: rotate(30deg);
         }
+
         .deg150 {
             transform: rotate(60deg);
         }
@@ -34,6 +37,7 @@
 </head>
 <body>
 <h1></h1>
+
 <h2></h2>
 <span>use arrow keys to control the robot</span>
 
@@ -48,10 +52,12 @@
 <script>
     var msgs = ['EmBot is in auto mode', 'You are controlling EmBot now!'];
     document.addEventListener("DOMContentLoaded", function (event) {
+        var degs = [150, 120, 90, 60, 30];
         var $h1 = document.querySelector('h1');
         var $h2 = document.querySelector('h2');
         var $radarElements = document.querySelectorAll('#radar div');
-        var manual = false;
+        var lastAction;
+
         var socket = io.connect();
         socket.on('connect', function () {
             console.log('connected');
@@ -62,18 +68,35 @@
             $h2.innerText = 'disconnected';
         });
         socket.on('data', function (data) {
-            console.log('data',data);
-            data.sonar.forEach(function(item, index){
-                $radarElements[data.sonar.length - index - 1].style.height = item.dist + 'px';
-                if(item.dist < 30){
-                    $radarElements[data.sonar.length - index - 1].style.backgroundColor = 'red';
-                } else {
-                    $radarElements[data.sonar.length - index - 1].style.backgroundColor = 'grey';
+            console.log('data', data);
+            for (var i in data.sonar) {
+                var index = parseInt(i);
+                var item = data.sonar[index];
+
+                if (item) {
+                    $radarElements[degs.indexOf(index)].style.height = item + 'px';
+                    if (item < 30) {
+                        $radarElements[degs.indexOf(index)].style.backgroundColor = 'red';
+                    } else {
+                        $radarElements[degs.indexOf(index)].style.backgroundColor = 'grey';
+                    }
                 }
-            })
+            }
         });
         $h1.innerText = msgs[0];
 
+        var sounds = {
+            48: 0,
+            49: 1,
+            50: 2,
+            51: 3,
+            52: 4,
+            53: 5,
+            54: 6,
+            55: 7,
+            56: 8,
+            57: 9
+        };
 
         var map = {
             37: 'left',
@@ -88,52 +111,53 @@
             down: false
         };
 
-
-
         document.addEventListener('keydown', function (e) {
-            if(map[e.which]){
-                if(!manual){
-                    changeCtrl(true);
-                }
+            if(sounds[e.which]){
+                socket.emit('playSound', sounds[e.which]);
+            }
+            if (map[e.which]) {
                 keysPressed[map[e.which]] = true;
                 sendData();
             }
         });
         document.addEventListener('keyup', function (e) {
-            if(map[e.which]){
+            if (map[e.which]) {
                 keysPressed[map[e.which]] = false;
                 sendData();
             }
         });
 
-        var timeout;
-        function sendData(){
-            if (manual) {
-                clearTimeout(timeout);
-                console.log(keysPressed);
-                socket.emit('ctrl', keysPressed);
-                timeout = setTimeout(function(){
-                    var somethingPressed = false;
-                    for(var i in keysPressed){
-                        if(keysPressed[i]){
-                            somethingPressed = true;
-                            break;
-                        }
-                    }
-                    if(!somethingPressed){
-                        changeCtrl(false);
-                    }
-                }, 2000);
-            }
-        }
-
-        function changeCtrl(_manual){
-            manual = _manual;
-            socket.emit('ctrl-change', manual);
-            if (manual) {
-                $h1.innerText = msgs[1];
+        function sendData() {
+            var action;
+            if (keysPressed.up) {
+                if (keysPressed.left) {
+                    action = 'forwardLeft';
+                } else if (keysPressed.right) {
+                    action = 'forwardRight';
+                } else {
+                    action = 'forward';
+                }
+            } else if (keysPressed.down) {
+                if (keysPressed.left) {
+                    action = 'backLeft';
+                } else if (keysPressed.right) {
+                    action = 'backRight';
+                } else {
+                    action = 'back';
+                }
+            } else if (keysPressed.left) {
+                action = 'left';
+            } else if (keysPressed.right) {
+                action = 'right';
             } else {
-                $h1.innerText = msgs[0];
+                action = 'stop';
+
+            }
+
+            if (lastAction !== action) {
+                console.log('steer', action);
+                socket.emit('steer', action);
+                lastAction = action;
             }
         }
     });

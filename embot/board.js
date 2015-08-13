@@ -1,128 +1,114 @@
 var five = require("johnny-five");
+var play = require('./play');
 var board = new five.Board();
 
-var UP = 'up';
-var DOWN = 'down';
+var drive = true;
 
-var SERVO_MIN_DEG = 30;
-var SERVO_MAX_DEG = 150;
-var SERVO_STEPS = 30;
-var SERVO_TIME = 200;
 
-var map = [];
+var map = [null, null, null];
 var motorConfigs = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V1;
-var lookingAt = 90;
-var sweepDir = UP;
 var manual = false;
 var leftMotor;
 var rightMotor;
+var action;
 
 board.on("ready", function () {
-    var servo = new five.Servo({
-        pin: 10
-    });
+
     leftMotor = new five.Motor(motorConfigs.M1);
     rightMotor = new five.Motor(motorConfigs.M2);
-    var ping = new five.Ping(2);
 
-    /*  var ping = new five.Proximity({
+    var pingCenter = new five.Ping({
+        pin: 2
+    });
+    pingCenter.on('data', pingCenterData);
+
+
+
+
+    //go(255, 255);
+
+    /*var ping = new five.Ping({
+     pin: 2,
+     freq: PING_FREQ
+     });
+
+     var ping = new five.Proximity({
      controller: "HCSR04",
      pin: 2,
-     freq: 500
+     freq: PING_FREQ
      });*/
-    servo.center();
-    leftMotor.forward(255);
-    rightMotor.forward(255);
-    ping.on("change", pingData);
-    sweep();
-    this.loop(500, function () {
+    //ping.on("data", pingData);
+
+    function steer() {
         if (manual) {
             return;
         }
+        if (Math.random() < 0.1) {
+            // do random walk back to avoid getting stuck
+            // go(-100, -255);
+            // return;
+        }
         var closest = getClosest();
         if (closest && closest.dist < 30) {
-            console.log('PRETTY CLOSE! closest', closest);
+            console.log('TOO CLOSE', closest);
             switch (closest.degree) {
                 case 30:
-                    leftMotor.forward(100);
-                    rightMotor.reverse(255);
+                    go(255, 100);
                     break;
                 case 60:
-                    leftMotor.reverse(100);
-                    rightMotor.reverse(255);
+                    go(255, 0);
                     break;
                 case 90:
-                    leftMotor.reverse(255);
-                    rightMotor.reverse(100);
+                    go(-255 * Math.random(), -255 * Math.random());
                     break;
                 case 120:
-                    leftMotor.reverse(255);
-                    rightMotor.reverse(100);
+                    go(0, 255);
                     break;
                 case 150:
-                    leftMotor.reverse(255);
-                    rightMotor.forward(100);
+                    go(100, 255);
                     break;
             }
         } else {
             var furthest = getFurthest();
-            console.log('FORWARD! furthest', furthest);
+            console.log('GO FAR', furthest);
             if (furthest !== null) {
                 switch (furthest.degree) {
                     case 30:
-                        leftMotor.forward(255);
-                        rightMotor.forward(155);
+                        go(255, 155);
                         break;
                     case 60:
-                        leftMotor.forward(255);
-                        rightMotor.forward(200);
+                        go(255, 200);
                         break;
                     case 90:
-                        leftMotor.forward(255);
-                        rightMotor.forward(255);
+                        go(255, 255);
                         break;
                     case 120:
-                        leftMotor.forward(200);
-                        rightMotor.forward(255);
+                        go(200, 255);
                         break;
                     case 150:
-                        leftMotor.forward(155);
-                        rightMotor.forward(255);
+                        go(155, 255);
                         break;
                 }
             }
         }
-    });
-
-    function sweep() {
-        if (!manual) {
-            if (lookingAt === SERVO_MIN_DEG || (sweepDir === UP && lookingAt !== SERVO_MAX_DEG)) {
-                lookingAt += SERVO_STEPS;
-                sweepDir = UP;
-            } else {
-                lookingAt -= SERVO_STEPS;
-                sweepDir = DOWN;
-            }
-            servo.to(lookingAt);
-        }
-        board.wait(SERVO_TIME, sweep);
+        console.log(action);
     }
+
 
     function getFurthest() {
         var furthest = -1;
         var furthestDist = 0;
-        var t = Date.now();
-        map.forEach(function (v, i) {
-            if (v && v.t > t - 1000 && v.dist > furthestDist) {
+        for (var i in map) {
+            if (map[i] && map[i] > furthestDist) {
                 furthest = i;
-                furthestDist = v.dist;
+                furthestDist = map[i];
             }
-        });
+        }
         if (furthest == -1) {
             return null;
         }
         return {
-            degree: (furthest + 1) * SERVO_STEPS,
+            degree: parseInt(furthest),
             dist: furthestDist
         }
     }
@@ -130,74 +116,80 @@ board.on("ready", function () {
     function getClosest() {
         var closest = -1;
         var closestDist = 1000;
-        var t = Date.now();
-        map.forEach(function (v, i) {
-            if (v && v.t > t - 1000 && v.dist < closestDist) {
+        for (var i in map) {
+            if (map[i] && map[i] < closestDist) {
                 closest = i;
-                closestDist = v.dist;
+                closestDist = map[i];
             }
-        });
+        }
         if (closest == -1) {
             return null;
         }
         return {
-            degree: (closest + 1) * SERVO_STEPS,
+            degree: parseInt(closest),
             dist: closestDist
         }
     }
 
-    function pingData() {
-        if (manual) {
-            return;
-        }
-        if (this.cm < 1000 && this.cm > 1) {
-            map[(servo.value / SERVO_STEPS) - 1] = {
-                dist: this.cm,
-                t: Date.now()
-            };
-        }
+
+    function pingCenterData() {
+        map[1] = Math.round(this.cm);
     }
 });
 
-exports.getSonarData = function(){
+function go(left, right) {
+    if (drive && leftMotor && rightMotor) {
+        if (left < 0) {
+            leftMotor.reverse(Math.abs(left));
+        } else {
+            leftMotor.forward(left);
+        }
+        if (right < 0) {
+            rightMotor.reverse(Math.abs(right));
+        } else {
+            rightMotor.forward(right);
+        }
+    }
+    action = {
+        left: left,
+        right: right
+    }
+}
+
+exports.getSonarData = function () {
     return map;
 };
 
-exports.ctrlChange = function (_manual) {
-    manual = _manual;
-    leftMotor.forward(0);
-    rightMotor.forward(0);
-};
 
-var timeout;
-exports.ctrl = function (dirs) {
-    clearTimeout(timeout);
-    if (dirs.up && dirs.left) {
-        leftMotor.forward(150);
-        rightMotor.forward(255);
-    } else if (dirs.up && dirs.right) {
-        leftMotor.forward(255);
-        rightMotor.forward(150);
-    } else if (dirs.up) {
-        leftMotor.forward(255);
-        rightMotor.forward(255);
-    } else if (dirs.down && dirs.left) {
-        leftMotor.reverse(150);
-        rightMotor.reverse(255);
-    } else if (dirs.down && dirs.right) {
-        leftMotor.reverse(255);
-        rightMotor.reverse(150);
-    } else if (dirs.down) {
-        leftMotor.reverse(255);
-        rightMotor.reverse(255);
-    } else if(dirs.left) {
-        leftMotor.reverse(255);
-        rightMotor.forward(255);
-    } else if(dirs.right) {
-        leftMotor.forward(255);
-        rightMotor.reverse(255);
-    } else {
-        leftMotor.forward(0);
-        rightMotor.forward(0);
+exports.steer = function (action) {
+    console.log('steer ' + action);
+    switch (action) {
+        case 'forward':
+            go(255, 255);
+            break;
+        case 'forwardLeft':
+            go(150, 255);
+            break;
+        case 'forwardRight':
+            go(255, 150);
+            break;
+        case 'back':
+            go(-255, -255);
+            break;
+        case 'backLeft':
+            go(-150, -255);
+            break;
+        case 'backRight':
+            go(-255, -150);
+            break;
+        case 'left':
+            go(-255, 255);
+            break;
+        case 'right':
+            go(255, -255);
+            break;
+        case 'stop':
+            go(0, 0);
+            break;
     }
 };

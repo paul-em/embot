@@ -3,6 +3,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var path = require('path');
 var board = require('./board');
+var play = require('./play');
 
 app.get('/', function(req, res){
     res.sendFile(path.resolve('./index.html'));
@@ -10,25 +11,17 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
     console.log('a user connected');
-    socket.on('ctrl-change', function(data){
-        console.log('ctrl change', data);
-        board.ctrlChange(data);
+
+    socket.on('steer', function(data){
+        board.steer(data);
     });
 
-    socket.on('ctrl', function(data){
-        console.log('ctrl change', data);
-        board.ctrl(data);
+    socket.on('playSound', function(num){
+        play(num);
     });
-
-    var interval = setInterval(function(){
-        socket.emit('data', {
-            sonar: board.getSonarData()
-        });
-    }, 200);
 
     socket.on('disconnect', function(){
-        board.ctrlChange(false);
-        clearInterval(interval);
+        console.log('a user disconnected');
     });
 });
 
