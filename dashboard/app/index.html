@@ -116,10 +116,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <iron-pages attr-for-selected="data-route" selected="{{route}}">
 
             <section data-route="home">
+              <paper-material>
+                <h1>Mode</h1>
+                <paper-radio-group selected="manual">
+                  <paper-radio-button name="auto">Auto</paper-radio-button><br>
+                  <paper-radio-button name="manual">Manual</paper-radio-button>
+                </paper-radio-group>
+              </paper-material>
               <paper-material elevation="1">
-                <embot-steer-control>
-
-                </embot-steer-control>
+                <embot-steer-control></embot-steer-control>
+              </paper-material>
+              <paper-material elevation="1">
+                <embot-sonar></embot-sonar>
               </paper-material>
               <paper-material elevation="1">
                 <my-greeting></my-greeting>

@@ -18,7 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
 
-    paper-button {
+    :host paper-button {
       margin: 5px;
       background: var(--default-primary-color);
       color: #fff;
@@ -27,6 +27,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   </style>
   <template>
+    <span>{{state}}</span>
+    <br>
     <paper-button id="up" raised><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon></paper-button>
     <br>
     <paper-button id="left" raised><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon></paper-button>
@@ -138,6 +140,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (lastAction !== action) {
           self.fire('action', action);
           lastAction = action;
+          self.state = action;
         }
       }
     })();

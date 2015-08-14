@@ -1,0 +1,132 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="embot-sonar">
+  <style>
+    :host {
+      display: block;
+      text-align: center;
+      position: relative;
+      width: 100%;
+      height: 300px;
+    }
+
+    :host .robot {
+      position: absolute;
+      top: 25%;
+      background-color: grey;
+      height: 50%;
+      width: 50%;
+      border-radius: 10px;
+      max-width: 400px;
+    }
+
+    :host .robot .wheel {
+      width: 30%;
+      height: 20px;
+      position: absolute;
+      background-color: grey;
+      left: 40%;
+    }
+
+    :host .robot .wheel:first-of-type {
+      top: -20px;
+    }
+
+    :host .robot .wheel:nth-of-type(2) {
+      bottom: -20px;
+    }
+    :host .sonar {
+      position: absolute;
+      right: 0;
+      top: 50%;
+    }
+    :host .sonar div {
+      width: 10px;
+      display: inline-block;
+      transform-origin: 100% 50%;
+      position: absolute;
+    }
+
+    :host #left {
+      transform: rotate(45deg);
+    }
+
+    :host #center {
+      transform: rotate(90deg);
+    }
+
+    :host #right {
+      transform: rotate(135deg);
+    }
+
+
+  </style>
+  <template>
+    <div class="robot">
+      <div class="wheel"></div>
+      <div class="wheel"></div>
+      <div class="sonar">
+        <div id="left"></div>
+        <div id="center"></div>
+        <div id="right"></div>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+
+        is: 'embot-sonar',
+
+        properties: {
+          left: {
+            type: Number,
+            observer: '_leftChanged'
+          },
+          center: {
+            type: Number,
+            observer: '_centerChanged'
+          },
+          right: {
+            type: Number,
+            observer: '_rightChanged'
+          }
+        },
+        _leftChanged: function(){
+          console.log('left changed', this.left);
+          update(this.$.left, this.left);
+        },
+        _centerChanged: function(){
+          update(this.$.center, this.center);
+        },
+        _rightChanged: function(){
+          update(this.$.right, this.right);
+        }
+      });
+
+      function update(el, data){
+        if (el) {
+          el.style.height = data + 'px';
+          if (data < 30) {
+            el.style.backgroundColor = 'red';
+          } else {
+            el.style.backgroundColor = 'grey';
+          }
+        }
+      }
+    })();
+  </script>
+
+</dom-module>

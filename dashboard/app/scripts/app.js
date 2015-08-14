@@ -31,7 +31,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     var steerCtrl = document.querySelector('embot-steer-control');
     steerCtrl.addEventListener('action', function(data){
       console.log('action', data.detail);
-    })
+    });
+
+    var sonar = document.querySelector('embot-sonar');
+    sonar.left = 31;
+    sonar.center = 200;
+    sonar.right = 1;
   });
 
   // Main area's paper-scroll-header-panel custom condensing transformation of
