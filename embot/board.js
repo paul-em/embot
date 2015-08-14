@@ -19,22 +19,17 @@ board.on("ready", function () {
     var pingCenter = new five.Ping({
         pin: 2
     });
+    var pingRight = new five.Ping({
+        pin: 5
+    });
+    var pingLeft = new five.Ping({
+        pin: 6
+    });
     pingCenter.on('data', pingCenterData);
+    pingRight.on('data', pingRightData);
+    pingLeft.on('data', pingLeftData);
 
 
-    //go(255, 255);
-
-    /*var ping = new five.Ping({
-     pin: 2,
-     freq: PING_FREQ
-     });
-
-     var ping = new five.Proximity({
-     controller: "HCSR04",
-     pin: 2,
-     freq: PING_FREQ
-     });*/
-    //ping.on("data", pingData);
 
     function autoSteer() {
         if (manual) {
@@ -131,6 +126,12 @@ board.on("ready", function () {
 
     function pingCenterData() {
         map[1] = normalizePingData(this.cm);
+    }
+    function pingRightData() {
+        map[2] = normalizePingData(this.cm);
+    }
+    function pingLeftData() {
+        map[0] = normalizePingData(this.cm);
     }
 
     function normalizePingData(raw){
