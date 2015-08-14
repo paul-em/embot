@@ -4,32 +4,47 @@ var io = require('socket.io')(http);
 var path = require('path');
 var board = require('./board');
 var play = require('./play');
+var fs = require('fs');
 
-app.get('/', function(req, res){
+var rawlngList = fs.readdirSync('./sounds');
+var lngList = [];
+rawlngList.forEach(function (file) {
+    if (fs.statSync('./sounds/' + file).isDirectory()) {
+        lngList.push(file);
+    }
+});
+
+var soundList = JSON.parse(fs.readFileSync('./sounds/list.json', 'utf8'));
+
+app.get('/', function (req, res) {
     res.sendFile(path.resolve('./index.html'));
 });
 
-io.on('connection', function(socket){
+io.on('connection', function (socket) {
     console.log('a user connected');
     var dataInterval;
-    socket.on('steer', function(data){
+    socket.on('steer', function (data) {
         board.steer(data);
     });
 
-    socket.on('playSound', function(num){
+    socket.on('playSound', function (num) {
         play(num);
     });
 
-    socket.on('disconnect', function(){
+    socket.on('disconnect', function () {
         console.log('a user disconnected');
+        clearInterval(dataInterval);
     });
 
-    dataInterval = setInterval(function(){
+    socket.emit('soundList', soundList);
+    socket.emit('lngList', lngList);
+
+    dataInterval = setInterval(function () {
         socket.emit('data', board.getData());
     }, 500);
 });
 
 
-http.listen(3000, function(){
+http.listen(3000, function () {
     console.log('listening on *:3000');
 });

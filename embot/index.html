@@ -54,6 +54,8 @@
         var $h2 = document.querySelector('h2');
         var $radarElements = document.querySelectorAll('#radar div');
         var lastAction;
+        var soundList;
+        var lngList;
 
         var socket = io.connect();
         socket.on('connect', function () {
@@ -63,6 +65,14 @@
         socket.on('disconnect', function () {
             console.log('disconnected');
             $h2.innerText = 'disconnected';
+        });
+        socket.on('soundList', function(data){
+            console.log('got soundList', data);
+            soundList = data;
+        });
+        socket.on('lngList', function(data){
+            console.log('got lngList', data);
+            lngList = data;
         });
         socket.on('data', function (data) {
             console.log('data', data);

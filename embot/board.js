@@ -22,8 +22,6 @@ board.on("ready", function () {
     pingCenter.on('data', pingCenterData);
 
 
-
-
     //go(255, 255);
 
     /*var ping = new five.Ping({
@@ -132,7 +130,15 @@ board.on("ready", function () {
 
 
     function pingCenterData() {
-        map[1] = Math.round(this.cm);
+        map[1] = normalizePingData(this.cm);
+    }
+
+    function normalizePingData(raw){
+        var dist = raw;
+        if (dist > 200) {
+            dist = 200;
+        }
+        return Math.round(dist);
     }
 });
 
