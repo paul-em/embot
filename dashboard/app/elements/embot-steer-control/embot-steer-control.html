@@ -1,0 +1,146 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="embot-steer-control">
+  <style>
+    :host {
+      display: block;
+      text-align: center;
+    }
+
+
+    paper-button {
+      margin: 5px;
+      background: var(--default-primary-color);
+      color: #fff;
+    }
+
+
+  </style>
+  <template>
+    <paper-button id="up" raised><iron-icon icon="hardware:keyboard-arrow-up"></iron-icon></paper-button>
+    <br>
+    <paper-button id="left" raised><iron-icon icon="hardware:keyboard-arrow-left"></iron-icon></paper-button>
+    <paper-button id="down" raised><iron-icon icon="hardware:keyboard-arrow-down"></iron-icon></paper-button>
+    <paper-button id="right" raised><iron-icon icon="hardware:keyboard-arrow-right"></iron-icon></paper-button>
+  </template>
+
+  <script>
+    (function() {
+      var self, lastAction;
+
+      var map = {
+        37: 'left',
+        38: 'up',
+        39: 'right',
+        40: 'down'
+      };
+      var keysPressed = {
+        left: false,
+        up: false,
+        right: false,
+        down: false
+      };
+
+      Polymer({
+        is: 'embot-steer-control',
+        ready: function() {
+          self = this;
+
+          self.$.up.addEventListener('down', function(){
+            keysPressed.up = true;
+            sendData();
+          });
+          self.$.up.addEventListener('up', function(){
+            keysPressed.up = false;
+            sendData();
+          });
+          self.$.left.addEventListener('down', function(){
+            keysPressed.left = true;
+            sendData();
+          });
+          self.$.left.addEventListener('up', function(){
+            keysPressed.left = false;
+            sendData();
+          });
+          self.$.down.addEventListener('down', function(){
+            keysPressed.down = true;
+            sendData();
+          });
+          self.$.down.addEventListener('up', function(){
+            keysPressed.down = false;
+            sendData();
+          });
+          self.$.right.addEventListener('down', function(){
+            keysPressed.right = true;
+            sendData();
+          });
+          self.$.right.addEventListener('up', function(){
+            keysPressed.right = false;
+            sendData();
+          });
+
+          document.addEventListener('keydown', function (e) {
+            if (map[e.which]) {
+              keysPressed[map[e.which]] = true;
+              sendData();
+              e.preventDefault();
+            }
+          });
+          document.addEventListener('keyup', function (e) {
+            if (map[e.which]) {
+              keysPressed[map[e.which]] = false;
+              sendData();
+              e.preventDefault();
+            }
+          });
+        },
+        upPressed: function(){
+          console.log('up pressed')
+        }
+      });
+
+      function sendData() {
+        var action;
+        if (keysPressed.up) {
+          if (keysPressed.left) {
+            action = 'forwardLeft';
+          } else if (keysPressed.right) {
+            action = 'forwardRight';
+          } else {
+            action = 'forward';
+          }
+        } else if (keysPressed.down) {
+          if (keysPressed.left) {
+            action = 'backLeft';
+          } else if (keysPressed.right) {
+            action = 'backRight';
+          } else {
+            action = 'back';
+          }
+        } else if (keysPressed.left) {
+          action = 'left';
+        } else if (keysPressed.right) {
+          action = 'right';
+        } else {
+          action = 'stop';
+        }
+
+        if (lastAction !== action) {
+          self.fire('action', action);
+          lastAction = action;
+        }
+      }
+    })();
+  </script>
+
+</dom-module>

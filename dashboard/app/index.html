@@ -76,8 +76,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </a>
 
           <a data-route="users" href="/users">
-            <iron-icon icon="info"></iron-icon>
-            <span>Users</span>
+            <iron-icon icon="av:volume-up"></iron-icon>
+            <span>Sounds</span>
           </a>
 
           <a data-route="contact" href="/contact">
@@ -101,12 +101,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <!-- Application name -->
           <div class="middle middle-container center horizontal layout">
-            <div class="app-name">Polymer Starter Kit</div>
+            <div class="app-name">emBot</div>
           </div>
 
           <!-- Application sub title -->
           <div class="bottom bottom-container center horizontal layout">
-            <div class="bottom-title paper-font-subhead">The future of the web today</div>
+            <div class="bottom-title paper-font-subhead"></div>
           </div>
 
         </paper-toolbar>
@@ -116,6 +116,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <iron-pages attr-for-selected="data-route" selected="{{route}}">
 
             <section data-route="home">
+              <paper-material elevation="1">
+                <embot-steer-control>
+
+                </embot-steer-control>
+              </paper-material>
               <paper-material elevation="1">
                 <my-greeting></my-greeting>
 
