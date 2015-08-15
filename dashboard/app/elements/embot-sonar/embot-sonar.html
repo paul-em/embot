@@ -13,7 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="embot-sonar">
   <style>
     :host {
-      display: block;
+      display: flex;
       text-align: center;
       position: relative;
       width: 100%;
@@ -21,13 +21,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     :host .robot {
-      position: absolute;
-      top: 25%;
+      position: relative;
+      flex: 1;
       background-color: grey;
-      height: 50%;
+      height: 150px;
       width: 50%;
-      border-radius: 10px;
-      max-width: 400px;
+      border-radius: 50% 100px 100px 50%;
+      margin-top: 75px;
     }
 
     :host .robot .wheel {
@@ -46,27 +46,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       bottom: -20px;
     }
     :host .sonar {
-      position: absolute;
-      right: 0;
-      top: 50%;
+      position: relative;
+      flex: 2;
+      height: 300px;
     }
     :host .sonar div {
-      width: 10px;
-      display: inline-block;
-      transform-origin: 100% 50%;
       position: absolute;
+      height: 10px;
+      display: inline-block;
+      transform-origin: 50% 100%;
     }
 
     :host #left {
-      transform: rotate(45deg);
+      left: -10px;
+      top: 100px;
+     /* transform: rotate(-35deg);*/
     }
 
     :host #center {
-      transform: rotate(90deg);
+      left: 0;
+      top: 145px;
     }
 
     :host #right {
-      transform: rotate(135deg);
+      left: -10px;
+      top: 190px;
+      /* transform: rotate(35deg);*/
     }
 
 
@@ -75,13 +80,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="robot">
       <div class="wheel"></div>
       <div class="wheel"></div>
-      <div class="sonar">
-        <div id="left"></div>
-        <div id="center"></div>
-        <div id="right"></div>
-      </div>
     </div>
-
+    <div class="sonar">
+      <div id="left"></div>
+      <div id="center"></div>
+      <div id="right"></div>
+    </div>
   </template>
 
   <script>
@@ -105,7 +109,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         },
         _leftChanged: function(){
-          console.log('left changed', this.left);
           update(this.$.left, this.left);
         },
         _centerChanged: function(){
@@ -118,7 +121,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       function update(el, data){
         if (el) {
-          el.style.height = data + 'px';
+          el.style.width = data + 'px';
           if (data < 30) {
             el.style.backgroundColor = 'red';
           } else {

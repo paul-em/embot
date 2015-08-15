@@ -8,37 +8,46 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<dom-module id="my-greeting">
+
+<dom-module id="embot-sound-list">
   <style>
     :host {
       display: block;
     }
 
-    @media (max-width: 600px) {
-      h1.paper-font-display1 {
-        font-size: 24px;
-      }
+    :host paper-button {
+      margin-top: 10px;
     }
   </style>
   <template>
-    <h1 class="paper-font-display1"><span>{{greeting}}</span></h1>
-    <span class="paper-font-body2">Update text to change the greeting.</span>
-    <!-- Listens for "input" event and sets greeting to <input>.value -->
-    <input class="paper-font-body2" value="{{greeting::input}}">
+    <template is="dom-repeat" items="{{soundList}}">
+      <paper-button raised title="{{item.val}}">{{item.name}}</paper-button>
+    </template>
   </template>
 
   <script>
-    (function() {
+    (function () {
       Polymer({
-        is: 'my-greeting',
+
+        is: 'embot-sound-list',
 
         properties: {
-          greeting: {
-            type: String,
-            value: 'Welcome!',
-            notify: true
+          soundList: {
+            type: Array
+          }
+        },
+
+        listeners: {
+          'tap': '_click'
+        },
+
+        _click: function (e) {
+          var val = e.path[1].title;
+          if (val && val.length === 2) {
+            this.fire('play', e.path[1].title);
           }
         }
+
       });
     })();
   </script>

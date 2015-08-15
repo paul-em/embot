@@ -27,8 +27,8 @@ io.on('connection', function (socket) {
         board.steer(data);
     });
 
-    socket.on('playSound', function (num) {
-        play(num);
+    socket.on('playSound', function (data) {
+        play(data.sound, data.lng);
     });
 
     socket.on('disconnect', function () {

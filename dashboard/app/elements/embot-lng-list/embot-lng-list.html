@@ -8,38 +8,30 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<dom-module id="my-list">
-  <style>
-    :host {
-      display: block;
-    }
-  </style>
+
+<dom-module id="embot-lng-list">
   <template>
-    <ul>
-      <template is="dom-repeat" items="{{items}}">
-        <li><span class="paper-font-body1">{{item}}</span></li>
+    <paper-radio-group selected="{{selected}}">
+      <template is="dom-repeat" items="{{lngList}}">
+        <paper-radio-button name="{{item}}">{{item}}</paper-radio-button>
       </template>
-    </ul>
+    </paper-radio-group>
   </template>
 
   <script>
-    (function () {
+    (function() {
       Polymer({
-        is: 'my-list',
+
+        is: 'embot-lng-list',
+
         properties: {
-          items: {
+          lngList: {
             type: Array
+          },
+          selected: {
+            type: String,
+            value: 'en'
           }
-        },
-        ready: function() {
-          this.items = [
-            'Responsive Web App boilerplate',
-            'Iron Elements and Paper Elements',
-            'End-to-end Build Tooling (including Vulcanize)',
-            'Unit testing with Web Component Tester',
-            'Routing with Page.js',
-            'Offline support with the Platinum Service Worker Elements'
-          ];
         }
       });
     })();

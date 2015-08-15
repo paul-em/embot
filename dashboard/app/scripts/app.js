@@ -19,24 +19,66 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     document.querySelector('#caching-complete').show();
   };
 
-  // Listen for template bound event to know when bindings
-  // have resolved and content has been stamped to the page
-  app.addEventListener('dom-change', function() {
-    console.log('Our app is ready to rock!');
-  });
 
   // See https://github.com/Polymer/polymer/issues/1381
   window.addEventListener('WebComponentsReady', function() {
-    // imports are loaded and elements have been registered
+    var socket = io.connect('http://192.168.1.23:3000');
+
+
     var steerCtrl = document.querySelector('embot-steer-control');
     steerCtrl.addEventListener('action', function(data){
-      console.log('action', data.detail);
+      socket.emit('steer', data.detail);
     });
 
     var sonar = document.querySelector('embot-sonar');
     sonar.left = 31;
     sonar.center = 200;
     sonar.right = 1;
+
+    var lngList = document.querySelector('embot-lng-list');
+    var soundList = document.querySelector('embot-sound-list');
+
+    soundList.addEventListener('play', function(e){
+      console.log('play', e.detail, lngList.selected);
+      socket.emit('playSound', {
+        lng: lngList.selected,
+        sound: e.detail
+      })
+    });
+
+
+    socket.on('connect', function () {
+      console.log('connected');
+
+    });
+    socket.on('disconnect', function () {
+      console.log('disconnected');
+    });
+
+    socket.on('soundList', function(data){
+      console.log('got soundList', data);
+      var list = [];
+      for(var i in data){
+        list.push({
+          val: i,
+          name: data[i]
+        })
+      }
+      soundList.soundList = list;
+    });
+
+    socket.on('lngList', function(data){
+      console.log('got lngList', data);
+      lngList.lngList = data;
+    });
+
+    socket.on('data', function (data) {
+      console.log('got data', data.sonar)
+      sonar.left = data.sonar[0];
+      sonar.center = data.sonar[1];
+      sonar.right = data.sonar[2];
+    });
+
   });
 
   // Main area's paper-scroll-header-panel custom condensing transformation of
