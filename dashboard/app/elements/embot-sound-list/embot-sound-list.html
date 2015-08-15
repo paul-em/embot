@@ -24,32 +24,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <paper-button raised title="{{item.val}}">{{item.name}}</paper-button>
     </template>
   </template>
-
-  <script>
-    (function () {
-      Polymer({
-
-        is: 'embot-sound-list',
-
-        properties: {
-          soundList: {
-            type: Array
-          }
-        },
-
-        listeners: {
-          'tap': '_click'
-        },
-
-        _click: function (e) {
-          var val = e.path[1].title;
-          if (val && val.length === 2) {
-            this.fire('play', e.path[1].title);
-          }
-        }
-
-      });
-    })();
-  </script>
-
 </dom-module>
+
+
+<script>
+  (function () {
+    Polymer({
+
+      is: 'embot-sound-list',
+
+      properties: {
+        soundList: {
+          type: Array
+        }
+      },
+
+      listeners: {
+        'tap': '_click'
+      },
+
+      _click: function (e) {
+        var val = e.path[1].title;
+        if (val && val.length === 2) {
+          this.fire('play', e.path[1].title);
+        }
+      }
+
+    });
+  })();
+</script>

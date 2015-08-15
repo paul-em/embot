@@ -8,7 +8,6 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
 
 <dom-module id="embot-sonar">
   <style>
@@ -87,49 +86,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div id="right"></div>
     </div>
   </template>
+</dom-module>
 
-  <script>
-    (function() {
-      Polymer({
+<script>
+  (function() {
+    Polymer({
 
-        is: 'embot-sonar',
+      is: 'embot-sonar',
 
-        properties: {
-          left: {
-            type: Number,
-            observer: '_leftChanged'
-          },
-          center: {
-            type: Number,
-            observer: '_centerChanged'
-          },
-          right: {
-            type: Number,
-            observer: '_rightChanged'
-          }
+      properties: {
+        left: {
+          type: Number,
+          observer: '_leftChanged'
         },
-        _leftChanged: function(){
-          update(this.$.left, this.left);
+        center: {
+          type: Number,
+          observer: '_centerChanged'
         },
-        _centerChanged: function(){
-          update(this.$.center, this.center);
-        },
-        _rightChanged: function(){
-          update(this.$.right, this.right);
+        right: {
+          type: Number,
+          observer: '_rightChanged'
         }
-      });
+      },
+      _leftChanged: function(){
+        update(this.$.left, this.left);
+      },
+      _centerChanged: function(){
+        update(this.$.center, this.center);
+      },
+      _rightChanged: function(){
+        update(this.$.right, this.right);
+      }
+    });
 
-      function update(el, data){
-        if (el) {
-          el.style.width = data + 'px';
-          if (data < 30) {
-            el.style.backgroundColor = 'red';
-          } else {
-            el.style.backgroundColor = 'grey';
-          }
+    function update(el, data){
+      if (el) {
+        el.style.width = data + 'px';
+        if (data < 30) {
+          el.style.backgroundColor = 'red';
+        } else {
+          el.style.backgroundColor = 'grey';
         }
       }
-    })();
-  </script>
-
-</dom-module>
+    }
+  })();
+</script>

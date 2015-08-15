@@ -1,4 +1,5 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var path = require('path');
@@ -16,9 +17,11 @@ rawlngList.forEach(function (file) {
 
 var soundList = JSON.parse(fs.readFileSync('./sounds/list.json', 'utf8'));
 
+app.use(express.static('dashboard'));
+/*
 app.get('/', function (req, res) {
     res.sendFile(path.resolve('./index.html'));
-});
+});*/
 
 io.on('connection', function (socket) {
     console.log('a user connected');

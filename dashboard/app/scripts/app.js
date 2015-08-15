@@ -22,7 +22,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   // See https://github.com/Polymer/polymer/issues/1381
   window.addEventListener('WebComponentsReady', function() {
-    var socket = io.connect('http://192.168.1.23:3000');
+    var socket = io.connect('http://192.168.1.23:3000'); // jshint ignore:line
+    //var socket = io.connect(); // jshint ignore:line
 
 
     var steerCtrl = document.querySelector('embot-steer-control');
@@ -43,7 +44,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       socket.emit('playSound', {
         lng: lngList.selected,
         sound: e.detail
-      })
+      });
     });
 
 
@@ -62,7 +63,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         list.push({
           val: i,
           name: data[i]
-        })
+        });
       }
       soundList.soundList = list;
     });
@@ -73,7 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     socket.on('data', function (data) {
-      console.log('got data', data.sonar)
+      console.log('got data', data.sonar);
       sonar.left = data.sonar[0];
       sonar.center = data.sonar[1];
       sonar.right = data.sonar[2];
