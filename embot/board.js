@@ -1,23 +1,108 @@
+var button1 = false; // drive
+var button2 = false; // auto
+
 var five = require("johnny-five");
 var board = new five.Board();
-
-var drive = true;
-
+var ready = false;
+var manual = false;
 var mapBuffer = [[], [], []];
 var map = [null, null, null];
 var motorConfigs = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V1;
-var manual = false;
 var leftMotor;
 var rightMotor;
 var action;
+var encoder = {
+    left: {
+        A: false,
+        B: false,
+        count: 0
+    },
+    right: {
+        A: false,
+        B: false,
+        count: 0
+    }
+};
+var LEFT = 'left';
+var RIGHT = 'right';
+var A = 'a';
+var B = 'b';
+var results = [];
+
 
 board.on("ready", function () {
+    if (ready) {
+        console.log('board threw another ready event');
+        return;
+    }
+    var that = this;
+    board.on("info", function (event) {
+        console.log("%s sent an 'info' message: %s", event.class, event.message);
+    });
+    board.on("warn", function (event) {
+        console.log("%s sent a 'warn' message: %s", event.class, event.message);
+    });
+    board.on("fail", function (event) {
+        console.log("%s sent a 'fail' message: %s", event.class, event.message);
+    });
 
+    ready = true;
     leftMotor = new five.Motor(motorConfigs.M1);
     rightMotor = new five.Motor(motorConfigs.M2);
+    //leftMotor.forward(255);
+    console.log('forward');
 
-    /*
-    var pingCenter = new five.Proximity({
+
+    this.pinMode(0, five.Pin.ANALOG);
+    this.pinMode(1, five.Pin.ANALOG);
+    this.pinMode(2, five.Pin.ANALOG);
+    this.pinMode(3, five.Pin.ANALOG);
+
+    this.analogRead(0, function (voltage) {
+        encoderUpdate(LEFT, A, voltage > 500);
+    });
+
+    this.analogRead(1, function (voltage) {
+        encoderUpdate(LEFT, B, voltage > 500);
+    });
+
+    this.analogRead(2, function (voltage) {
+        encoderUpdate(RIGHT, A, voltage > 500);
+    });
+
+    this.analogRead(3, function (voltage) {
+        encoderUpdate(RIGHT, B, voltage > 500);
+    });
+
+    this.analogRead(4, function (voltage) {
+        if(voltage < 10){
+            if(!button1 && !button2){
+                return;
+            }
+            button1 = false;
+            button2 = false;
+        } else if(voltage < 100){
+            if(button1 && !button2){
+                return;
+            }
+            button1 = true;
+            button2 = false;
+        } else if(voltage < 162){
+            if(!button1 && button2){
+                return;
+            }
+            button1 = false;
+            button2 = true;
+        } else {
+            if(button1 && button2){
+                return;
+            }
+            button1 = true;
+            button2 = true;
+        }
+    });
+
+    var pingCenter = new five.Ping({
         controller: "HCSR04",
         pin: 2,
         freq: 100
@@ -35,13 +120,10 @@ board.on("ready", function () {
     pingCenter.on('data', pingCenterData);
     pingRight.on('data', pingRightData);
     pingLeft.on('data', pingLeftData);
-*/
-    setInterval(autoSteer, 500);
+
+    setInterval(autoSteer, 300);
 
     function autoSteer() {
-        if (manual) {
-            return;
-        }
         mapBuffer.forEach(function (buffer, dir) {
             if (buffer.length === 0) {
                 map[dir] = null;
@@ -66,24 +148,27 @@ board.on("ready", function () {
         });
         mapBuffer = [[], [], []];
 
-
+        if (manual || !button1) {
+            return;
+        }
+        console.log(map);
         var closest = getClosest();
         if (closest && closest.dist < 30) {
-            //console.log('TOO CLOSE', closest);
+            console.log('TOO CLOSE', closest);
             switch (closest.dir) {
                 case 'left':
-                    go(255, 100);
+                    go(255, -255);
                     break;
                 case 'center':
-                    go(-255 * Math.random(), -255 * Math.random());
+                    go(-255 * Math.random(), 255 * Math.random());
                     break;
                 case 'right':
-                    go(100, 255);
+                    go(-255, 255);
                     break;
             }
         } else {
             var furthest = getFurthest();
-            //console.log('GO FAR', furthest);
+            console.log('GO FAR', furthest);
             if (furthest !== null) {
                 switch (furthest.dir) {
                     case 'left':
@@ -171,8 +256,24 @@ board.on("ready", function () {
     }
 });
 
+function encoderUpdate(side, output, on) {
+    var prev = encoder[side][output];
+    if (prev !== on) {
+        encoder[side][output] = on;
+        if(output === A && on){
+            if(encoder[side][B]){
+                console.log(side + ': clockwise rotations');
+                encoder[side].count++;
+            } else {
+                console.log(side + ': counterclockwise rotation');
+                encoder[side].count--;
+            }
+        }
+    }
+}
+
 function go(left, right) {
-    if (drive && leftMotor && rightMotor) {
+    if (button1 && leftMotor && rightMotor) {
         if (left < 0) {
             leftMotor.reverse(Math.abs(left));
         } else {
@@ -206,19 +307,19 @@ exports.steer = function (action) {
             go(255, 255);
             break;
         case 'forwardLeft':
-            go(150, 255);
+            go(0, 255);
             break;
         case 'forwardRight':
-            go(255, 150);
+            go(255, 0);
             break;
         case 'back':
             go(-255, -255);
             break;
         case 'backLeft':
-            go(-150, -255);
+            go(0, -255);
             break;
         case 'backRight':
-            go(-255, -150);
+            go(-255, 0);
             break;
         case 'left':
             go(-255, 255);
@@ -231,6 +332,5 @@ exports.steer = function (action) {
             timeout = setTimeout(function () {
                 manual = false;
             }, 2000);
-            break;
     }
 };

@@ -22,8 +22,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   // See https://github.com/Polymer/polymer/issues/1381
   window.addEventListener('WebComponentsReady', function() {
-    var socket = io.connect('http://192.168.1.23:3000'); // jshint ignore:line
-    //var socket = io.connect(); // jshint ignore:line
+    //var socket = io.connect('http://192.168.1.23:3000'); // jshint ignore:line
+    var socket = io.connect(); // jshint ignore:line
 
 
     var steerCtrl = document.querySelector('embot-steer-control');
