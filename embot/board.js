@@ -5,10 +5,9 @@ var button2 = false; // auto
 
 var five = require("johnny-five");
 var board = new five.Board();
+var that;
 var ready = false;
 var manual = false;
-var mapBuffer = [[], [], []];
-var map = [null, null, null];
 var motorConfigs = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V1;
 var leftMotor;
 var rightMotor;
@@ -27,9 +26,13 @@ var encoder = {
 };
 var LEFT = 'left';
 var RIGHT = 'right';
+var CENTER = 'center';
 var A = 'a';
 var B = 'b';
 var results = [];
+var pingData = [];
+
+var SIDES = [LEFT, CENTER, RIGHT];
 
 
 board.on("ready", function () {
@@ -37,7 +40,7 @@ board.on("ready", function () {
         console.log('board threw another ready event');
         return;
     }
-    var that = this;
+    that = this;
     board.on("info", function (event) {
         console.log("%s sent an 'info' message: %s", event.class, event.message);
     });
@@ -74,26 +77,26 @@ board.on("ready", function () {
     });
 
     this.analogRead(4, function (voltage) {
-        if(voltage < 10){
-            if(!button1 && !button2){
+        if (voltage < 10) {
+            if (!button1 && !button2) {
                 return;
             }
             button1 = false;
             button2 = false;
-        } else if(voltage < 100){
-            if(button1 && !button2){
+        } else if (voltage < 100) {
+            if (button1 && !button2) {
                 return;
             }
             button1 = true;
             button2 = false;
-        } else if(voltage < 162){
-            if(!button1 && button2){
+        } else if (voltage < 162) {
+            if (!button1 && button2) {
                 return;
             }
             button1 = false;
             button2 = true;
         } else {
-            if(button1 && button2){
+            if (button1 && button2) {
                 return;
             }
             button1 = true;
@@ -102,148 +105,67 @@ board.on("ready", function () {
         console.log('drive', button1, 'auto', button2);
     });
 
-    /*
-    var pingCenter = new five.Proximity({
-        controller: "HCSR04",
-        pin: 2
-    });
-    pingCenter.on('data', pingCenterData);
-
-    var pin = new five.Pin(2);
-    pin.write(1);
-    board.wait(1, function(){
-        pin.write(0);
-        pin.read(function(err, val){
-            console.log(err, val)
-        });
-    });
-
-
-    var pingCenter = new five.Proximity({
-        controller: "HCSR04",
-        pin: 2
-    });
-    pingCenter.on('data', pingCenterData);
-       var pingCenter = new five.Ping({
-        controller: "HCSR04",
-        pin: 2,
-        freq: 100
-    });
-      var pingRight = new five.Ping({
-        controller: "HCSR04",
-        pin: 5,
-        freq: 100
-    });
-    var pingLeft = new five.Ping({
-        controller: "HCSR04",
-        pin: 6,
-        freq: 100
-    });
-    pingCenter.on('data', pingCenterData);
-    pingRight.on('data', pingRightData);
-    pingLeft.on('data', pingLeftData);
-*/
-    //setInterval(autoSteer, 300);
-
+    autoSteer();
     function autoSteer() {
-        mapBuffer.forEach(function (buffer, dir) {
-            if (buffer.length === 0) {
-                map[dir] = null;
-                return;
+        if (manual || !button2  || !button1 || driveDisabled) {
+            if(!manual){
+                go(0, 0);
             }
-            var c = 0;
-            var total = 0;
-            var lowest = 1000;
-            var highest = 0;
-            buffer.forEach(function (val) {
-                var v = normalizePingData(val);
-                if (v < lowest) {
-                    lowest = v;
-                }
-                if (v > highest) {
-                    highest = v;
-                }
-                total += v;
-                c++;
-            });
-            map[dir] = Math.round((total - lowest - highest) / (c - 2));
-        });
-        mapBuffer = [[], [], []];
-
-        if (manual || !button1 || driveDisabled) {
+            setTimeout(autoSteer, 300);
             return;
         }
-        console.log(map);
-        var closest = getClosest();
-        if (closest && closest.dist < 30) {
-            console.log('TOO CLOSE', closest);
-            switch (closest.dir) {
-                case 'left':
+        // stop
+        go(0, 0);
+
+        // send pings
+        Promise.all([
+            ping(5),
+            ping(2),
+            ping(6)
+        ]).then(function (data) {
+            console.log(data);
+            pingData = data;
+            var closest = null;
+            var closestVal = null;
+            var furthest = null;
+            var furthestVal = null;
+            data.forEach(function(dist, index){
+                if(closestVal === null || dist < closestVal){
+                    closestVal = dist;
+                    closest = index;
+                }
+                if(furthestVal === null || dist > furthestVal){
+                    furthestVal = dist;
+                    furthest = index;
+                }
+            });
+
+
+            if(closestVal < 10){
+                console.log("OMG REALLY CLOSE ON", SIDES[closest]);
+                if(SIDES[closest] === LEFT){
                     go(255, -255);
-                    break;
-                case 'center':
-                    go(-255 * Math.random(), 255 * Math.random());
-                    break;
-                case 'right':
+                } else if(SIDES[closest] === RIGHT){
                     go(-255, 255);
-                    break;
-            }
-        } else {
-            var furthest = getFurthest();
-            console.log('GO FAR', furthest);
-            if (furthest !== null) {
-                switch (furthest.dir) {
-                    case 'left':
-                        go(255, 155);
-                        break;
-                    case 'center':
-                        go(255, 255);
-                        break;
-                    case 'right':
-                        go(155, 255);
-                        break;
+                } else {
+                    go(-255, 0);
+                }
+            } else {
+                console.log("GO FAR TO", SIDES[furthest]);
+                if(SIDES[furthest] === LEFT){
+                    go(100, 255);
+                } else if(SIDES[furthest] === RIGHT) {
+                    go(255, 100);
+                } else {
+                    go(255, 255);
                 }
             }
-        }
+            setTimeout(autoSteer, 300);
+        })
     }
 
 
-    function getFurthest() {
-        var furthest = -1;
-        var furthestDist = 0;
-        map.forEach(function (item, index) {
-            if (item && item > furthestDist) {
-                furthest = index;
-                furthestDist = item;
-            }
-        });
-        if (furthest == -1) {
-            return null;
-        }
-        return {
-            dir: getDir(furthest),
-            dist: furthestDist
-        }
-    }
 
-    function getClosest() {
-        var closest = -1;
-        var closestDist = 1000;
-        map.forEach(function (item, index) {
-            if (item && item < closestDist) {
-                closestDist = item;
-                closest = index;
-            }
-        });
-        if (closest == -1) {
-            return null;
-        }
-
-        return {
-            dir: getDir(closest),
-            dist: closestDist
-        }
-    }
 
     function getDir(index) {
         switch (index) {
@@ -256,42 +178,34 @@ board.on("ready", function () {
         }
         return null;
     }
-
-    function pingCenterData() {
-        mapBuffer[1].push(this.cm);
-    }
-
-    function pingRightData() {
-        mapBuffer[2].push(this.cm);
-    }
-
-    function pingLeftData() {
-        mapBuffer[0].push(this.cm);
-    }
-
-    function normalizePingData(raw) {
-        var dist = raw;
-        if (dist > 200) {
-            dist = 200;
-        }
-        return Math.round(dist);
-    }
 });
 
 function encoderUpdate(side, output, on) {
     var prev = encoder[side][output];
     if (prev !== on) {
         encoder[side][output] = on;
-        if(output === A && on){
-            if(encoder[side][B]){
-                console.log(side + ': clockwise rotations');
+        if (output === A && on) {
+            if (encoder[side][B]) {
+                //console.log(side + ': clockwise rotations');
                 encoder[side].count++;
             } else {
-                console.log(side + ': counterclockwise rotation');
+               // console.log(side + ': counterclockwise rotation');
                 encoder[side].count--;
             }
         }
     }
+}
+
+function ping(pin) {
+    return new Promise(function (resolve, reject) {
+        that.io.pingRead({
+            pin: pin,
+            value: that.io.HIGH,
+            pulseOut: 5
+        }, function (microseconds) {
+            resolve(+(microseconds / 29.1 / 2).toFixed(3));
+        });
+    });
 }
 
 function go(left, right) {
@@ -306,6 +220,9 @@ function go(left, right) {
         } else {
             rightMotor.forward(right);
         }
+    } else if(!button1){
+        leftMotor.stop();
+        rightMotor.stop();
     }
     action = {
         left: left,
@@ -315,7 +232,7 @@ function go(left, right) {
 
 exports.getData = function () {
     return {
-        sonar: map
+        sonar: pingData
     };
 };
 

@@ -15,6 +15,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   // Learn more about auto-binding templates at http://goo.gl/Dx1u2g
   var app = document.querySelector('#app');
 
+
   app.displayInstalledToast = function() {
     document.querySelector('#caching-complete').show();
   };
@@ -23,6 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   // See https://github.com/Polymer/polymer/issues/1381
   window.addEventListener('WebComponentsReady', function() {
     //var socket = io.connect('http://192.168.1.23:3000'); // jshint ignore:line
+    var status = document.querySelector('#status');
     var socket = io.connect(); // jshint ignore:line
 
 
@@ -50,10 +52,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     socket.on('connect', function () {
       console.log('connected');
-
+      status.innerText = 'connected';
     });
     socket.on('disconnect', function () {
       console.log('disconnected');
+      status.innerText = 'disconnected';
     });
 
     socket.on('soundList', function(data){

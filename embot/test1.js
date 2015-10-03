@@ -30,7 +30,7 @@ board.on("ready", function () {
     leftMotor = new five.Motor(motorConfigs.M1);
     rightMotor = new five.Motor(motorConfigs.M2);
 
-
+/*
     this.pinMode(0, five.Pin.ANALOG);
     this.pinMode(1, five.Pin.ANALOG);
     this.pinMode(2, five.Pin.ANALOG);
@@ -51,8 +51,9 @@ board.on("ready", function () {
     this.analogRead(3, function (voltage) {
         encoderUpdate(RIGHT, A, voltage > 500);
     });
-
+*/
     this.analogRead(4, function (voltage) {
+        console.log('volt', voltage);
         if(voltage < 10){
             if(!button1 && !button2){
                 return;
@@ -78,6 +79,7 @@ board.on("ready", function () {
             button1 = true;
             button2 = true;
         }
+        /*
         if(button1){
             leftMotor.forward();
         } else {
@@ -88,6 +90,7 @@ board.on("ready", function () {
         } else {
             rightMotor.stop();
         }
+        */
         console.log('drive', button1, 'auto', button2);
     });
 });
