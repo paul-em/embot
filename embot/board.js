@@ -1,3 +1,5 @@
+var driveDisabled = false;
+
 var button1 = false; // drive
 var button2 = false; // auto
 
@@ -49,9 +51,6 @@ board.on("ready", function () {
     ready = true;
     leftMotor = new five.Motor(motorConfigs.M1);
     rightMotor = new five.Motor(motorConfigs.M2);
-    //leftMotor.forward(255);
-    console.log('forward');
-
 
     this.pinMode(0, five.Pin.ANALOG);
     this.pinMode(1, five.Pin.ANALOG);
@@ -100,14 +99,37 @@ board.on("ready", function () {
             button1 = true;
             button2 = true;
         }
+        console.log('drive', button1, 'auto', button2);
     });
 
-    var pingCenter = new five.Ping({
+    /*
+    var pingCenter = new five.Proximity({
+        controller: "HCSR04",
+        pin: 2
+    });
+    pingCenter.on('data', pingCenterData);
+
+    var pin = new five.Pin(2);
+    pin.write(1);
+    board.wait(1, function(){
+        pin.write(0);
+        pin.read(function(err, val){
+            console.log(err, val)
+        });
+    });
+
+
+    var pingCenter = new five.Proximity({
+        controller: "HCSR04",
+        pin: 2
+    });
+    pingCenter.on('data', pingCenterData);
+       var pingCenter = new five.Ping({
         controller: "HCSR04",
         pin: 2,
         freq: 100
     });
-    var pingRight = new five.Ping({
+      var pingRight = new five.Ping({
         controller: "HCSR04",
         pin: 5,
         freq: 100
@@ -120,8 +142,8 @@ board.on("ready", function () {
     pingCenter.on('data', pingCenterData);
     pingRight.on('data', pingRightData);
     pingLeft.on('data', pingLeftData);
-
-    setInterval(autoSteer, 300);
+*/
+    //setInterval(autoSteer, 300);
 
     function autoSteer() {
         mapBuffer.forEach(function (buffer, dir) {
@@ -148,7 +170,7 @@ board.on("ready", function () {
         });
         mapBuffer = [[], [], []];
 
-        if (manual || !button1) {
+        if (manual || !button1 || driveDisabled) {
             return;
         }
         console.log(map);

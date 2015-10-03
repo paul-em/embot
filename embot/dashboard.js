@@ -7,15 +7,15 @@ var board = require('./board');
 var play = require('./play');
 var fs = require('fs');
 
-var rawlngList = fs.readdirSync('./sounds');
+var rawlngList = fs.readdirSync(path.join(__dirname, '/sounds'));
 var lngList = [];
 rawlngList.forEach(function (file) {
-    if (fs.statSync('./sounds/' + file).isDirectory()) {
+    if (fs.statSync(path.join(__dirname, '/sounds/' + file)).isDirectory()) {
         lngList.push(file);
     }
 });
 
-var soundList = JSON.parse(fs.readFileSync('./sounds/list.json', 'utf8'));
+var soundList = JSON.parse(fs.readFileSync(path.join(__dirname, '/sounds/list.json'), 'utf8'));
 
 app.use(express.static('dashboard'));
 /*
