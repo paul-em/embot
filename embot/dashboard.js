@@ -39,7 +39,7 @@ io.on('connection', function (socket) {
         clearInterval(dataInterval);
     });
 
-    socket.on('lngChange', function(){
+    socket.on('changeLng', function(data){
         board.lngChange(data);
     });
 
