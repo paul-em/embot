@@ -31,8 +31,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         selected: {
           type: String,
-          value: 'en'
+          value: 'en',
+          observer: '_selectedChanged'
         }
+      },
+      _selectedChanged: function(e){
+        this.fire('changed');
       }
     });
   })();

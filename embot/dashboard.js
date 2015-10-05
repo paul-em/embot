@@ -39,6 +39,10 @@ io.on('connection', function (socket) {
         clearInterval(dataInterval);
     });
 
+    socket.on('lngChange', function(){
+        board.lngChange(data);
+    });
+
     socket.emit('soundList', soundList);
     socket.emit('lngList', lngList);
 

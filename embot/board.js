@@ -1,9 +1,11 @@
 var driveDisabled = false;
+var lang = 'en';
 
 var button1 = false; // drive
 var button2 = false; // auto
 
 var five = require("johnny-five");
+var play = require('./play');
 var board = new five.Board();
 var that;
 var ready = false;
@@ -35,6 +37,10 @@ var pingData = [];
 var unChanged = 0;
 
 var SIDES = [LEFT, CENTER, RIGHT];
+
+var soundTimeout = setTimeout(function(){
+    play('14', lang);
+}, 20 * 1000);
 
 
 board.on("ready", function () {
@@ -104,6 +110,7 @@ board.on("ready", function () {
             button1 = true;
             button2 = true;
         }
+        play('01', lang);
         console.log('drive', button1, 'auto', button2);
     });
 
@@ -164,6 +171,7 @@ board.on("ready", function () {
                         go(-255, 255);
                     } else {
                         go(-255, 0);
+                        play('16', lang);
                     }
                 } else {
                     console.log("GO FAR TO", SIDES[furthest]);
@@ -173,6 +181,7 @@ board.on("ready", function () {
                         go(255, 100);
                     } else {
                         go(255, 255);
+                        play('30', lang);
                     }
                 }
             }
@@ -223,6 +232,10 @@ function go(left, right) {
         }, 20);
         return;
     }
+    if(soundTimeout && (left !== 0 || right !== 0)){
+        clearTimeout(soundTimeout);
+        soundTimeout = null;
+    }
     if (button1 && leftMotor && rightMotor) {
         if (left < 0) {
             leftMotor.reverse(Math.abs(left));
@@ -243,6 +256,10 @@ function go(left, right) {
         right: right
     }
 }
+
+exports.lngChange = function(lng){
+    lang = lng;
+};
 
 exports.getData = function () {
     return {

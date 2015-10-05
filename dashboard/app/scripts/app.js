@@ -25,7 +25,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   window.addEventListener('WebComponentsReady', function() {
     //var socket = io.connect('http://192.168.1.23:3000'); // jshint ignore:line
     var status = document.querySelector('#status');
-    var socket = io.connect(); // jshint ignore:line
+    var socket = {
+      emit: function(){},
+      on: function(a, cb){
+        if(a == 'connect'){
+          cb();
+        } else if(a == 'soundList'){
+          cb({1: 'asdf'});
+        } else if(a == 'lngList'){
+          cb(['en', 'de'])
+        }
+      }
+    };
+    //var socket = io.connect(); // jshint ignore:line
 
 
     var steerCtrl = document.querySelector('embot-steer-control');
@@ -40,6 +52,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     var lngList = document.querySelector('embot-lng-list');
     var soundList = document.querySelector('embot-sound-list');
+    lngList.addEventListener('changed', function(){
+      socket.emit('changeLng', lngList.selected);
+    });
 
     soundList.addEventListener('play', function(e){
       console.log('play', e.detail, lngList.selected);
