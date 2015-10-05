@@ -25,19 +25,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   window.addEventListener('WebComponentsReady', function() {
     //var socket = io.connect('http://192.168.1.23:3000'); // jshint ignore:line
     var status = document.querySelector('#status');
+    /*
+    // for local testing
     var socket = {
       emit: function(){},
       on: function(a, cb){
-        if(a == 'connect'){
+        if(a === 'connect'){
           cb();
-        } else if(a == 'soundList'){
+        } else if(a === 'soundList'){
           cb({1: 'asdf'});
-        } else if(a == 'lngList'){
-          cb(['en', 'de'])
+        } else if(a === 'lngList'){
+          cb(['en', 'de']);
         }
       }
-    };
-    //var socket = io.connect(); // jshint ignore:line
+    };*/
+    var socket = io.connect(); // jshint ignore:line
 
 
     var steerCtrl = document.querySelector('embot-steer-control');
