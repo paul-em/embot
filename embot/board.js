@@ -9,6 +9,7 @@ var that;
 var ready = false;
 var manual = false;
 var motorConfigs = five.Motor.SHIELD_CONFIGS.ADAFRUIT_V1;
+var sendingPing = false;
 var leftMotor;
 var rightMotor;
 var action;
@@ -31,6 +32,7 @@ var A = 'a';
 var B = 'b';
 var results = [];
 var pingData = [];
+var unChanged = 0;
 
 var SIDES = [LEFT, CENTER, RIGHT];
 
@@ -107,8 +109,8 @@ board.on("ready", function () {
 
     autoSteer();
     function autoSteer() {
-        if (manual || !button2  || !button1 || driveDisabled) {
-            if(!manual){
+        if (manual || !button2 || !button1 || driveDisabled) {
+            if (!manual) {
                 go(0, 0);
             }
             setTimeout(autoSteer, 300);
@@ -118,67 +120,73 @@ board.on("ready", function () {
         go(0, 0);
 
         // send pings
+        sendingPing = true;
+        var t = new Date().getTime();
         Promise.all([
             ping(5),
             ping(2),
             ping(6)
         ]).then(function (data) {
-            console.log(data);
-            pingData = data;
-            var closest = null;
-            var closestVal = null;
-            var furthest = null;
-            var furthestVal = null;
-            data.forEach(function(dist, index){
-                if(closestVal === null || dist < closestVal){
-                    closestVal = dist;
-                    closest = index;
-                }
-                if(furthestVal === null || dist > furthestVal){
-                    furthestVal = dist;
-                    furthest = index;
-                }
-            });
-
-
-            if(closestVal < 10){
-                console.log("OMG REALLY CLOSE ON", SIDES[closest]);
-                if(SIDES[closest] === LEFT){
-                    go(255, -255);
-                } else if(SIDES[closest] === RIGHT){
-                    go(-255, 255);
-                } else {
-                    go(-255, 0);
-                }
+            sendingPing = false;
+            console.log(data, Date.now() - t);
+            if (similar(pingData, data)) {
+                unChanged++;
             } else {
-                console.log("GO FAR TO", SIDES[furthest]);
-                if(SIDES[furthest] === LEFT){
-                    go(100, 255);
-                } else if(SIDES[furthest] === RIGHT) {
-                    go(255, 100);
+                unChanged = 0;
+            }
+            console.log('unchanged', unChanged);
+            if (unChanged > 5) {
+                // stuck somewhere
+                go(-255, -255);
+            } else {
+                pingData = data;
+                var closest = null;
+                var closestVal = null;
+                var furthest = null;
+                var furthestVal = null;
+                data.forEach(function (dist, index) {
+                    if (closestVal === null || dist < closestVal) {
+                        closestVal = dist;
+                        closest = index;
+                    }
+                    if (furthestVal === null || dist > furthestVal) {
+                        furthestVal = dist;
+                        furthest = index;
+                    }
+                });
+
+
+                if (closestVal < 20) {
+                    console.log("OMG REALLY CLOSE ON", SIDES[closest]);
+                    if (SIDES[closest] === LEFT) {
+                        go(255, -255);
+                    } else if (SIDES[closest] === RIGHT) {
+                        go(-255, 255);
+                    } else {
+                        go(-255, 0);
+                    }
                 } else {
-                    go(255, 255);
+                    console.log("GO FAR TO", SIDES[furthest]);
+                    if (SIDES[furthest] === LEFT) {
+                        go(100, 255);
+                    } else if (SIDES[furthest] === RIGHT) {
+                        go(255, 100);
+                    } else {
+                        go(255, 255);
+                    }
                 }
             }
             setTimeout(autoSteer, 300);
+
         })
     }
-
-
-
-
-    function getDir(index) {
-        switch (index) {
-            case 0:
-                return 'left';
-            case 1:
-                return 'center';
-            case 2:
-                return 'right';
-        }
-        return null;
-    }
 });
+
+function similar(arr1, arr2) {
+    return !arr1.some(function (val1, index) {
+        return Math.abs(val1 - arr2[index]) > 10;
+    });
+}
 
 function encoderUpdate(side, output, on) {
     var prev = encoder[side][output];
@@ -189,7 +197,7 @@ function encoderUpdate(side, output, on) {
                 //console.log(side + ': clockwise rotations');
                 encoder[side].count++;
             } else {
-               // console.log(side + ': counterclockwise rotation');
+                // console.log(side + ': counterclockwise rotation');
                 encoder[side].count--;
             }
         }
@@ -203,12 +211,18 @@ function ping(pin) {
             value: that.io.HIGH,
             pulseOut: 5
         }, function (microseconds) {
-            resolve(+(microseconds / 29.1 / 2).toFixed(3));
+            resolve(parseInt(microseconds / 29.1 / 2));
         });
     });
 }
 
 function go(left, right) {
+    if (sendingPing) {
+        setTimeout(function () {
+            go(left, right);
+        }, 20);
+        return;
+    }
     if (button1 && leftMotor && rightMotor) {
         if (left < 0) {
             leftMotor.reverse(Math.abs(left));
@@ -220,7 +234,7 @@ function go(left, right) {
         } else {
             rightMotor.forward(right);
         }
-    } else if(!button1){
+    } else if (!button1) {
         leftMotor.stop();
         rightMotor.stop();
     }

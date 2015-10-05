@@ -17,7 +17,7 @@ rawlngList.forEach(function (file) {
 
 var soundList = JSON.parse(fs.readFileSync(path.join(__dirname, '/sounds/list.json'), 'utf8'));
 
-app.use(express.static('dashboard'));
+app.use(express.static(path.join(__dirname, '/dashboard')));
 /*
 app.get('/', function (req, res) {
     res.sendFile(path.resolve('./index.html'));
