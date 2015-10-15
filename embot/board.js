@@ -38,7 +38,7 @@ var unChanged = 0;
 
 var SIDES = [LEFT, CENTER, RIGHT];
 
-var soundTimeout = setTimeout(function(){
+var soundTimeout = setTimeout(function () {
     play('14', lang);
 }, 20 * 1000);
 
@@ -129,11 +129,7 @@ board.on("ready", function () {
         // send pings
         sendingPing = true;
         var t = new Date().getTime();
-        Promise.all([
-            ping(5),
-            ping(2),
-            ping(6)
-        ]).then(function (data) {
+        pingAll().then(function (data) {
             sendingPing = false;
             console.log(data, Date.now() - t);
             if (similar(pingData, data)) {
@@ -213,6 +209,14 @@ function encoderUpdate(side, output, on) {
     }
 }
 
+function pingAll() {
+    return Promise.all([
+        ping(5),
+        ping(2),
+        ping(6)
+    ]);
+}
+
 function ping(pin) {
     return new Promise(function (resolve, reject) {
         that.io.pingRead({
@@ -232,7 +236,7 @@ function go(left, right) {
         }, 20);
         return;
     }
-    if(soundTimeout && (left !== 0 || right !== 0)){
+    if (soundTimeout && (left !== 0 || right !== 0)) {
         clearTimeout(soundTimeout);
         soundTimeout = null;
     }
@@ -257,7 +261,14 @@ function go(left, right) {
     }
 }
 
-exports.lngChange = function(lng){
+exports.pingAll = function () {
+    pingAll().then(function(data){
+        console.log('got data', data);
+        pingData = data;
+    })
+};
+
+exports.lngChange = function (lng) {
     lang = lng;
 };
 

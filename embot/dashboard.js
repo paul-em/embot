@@ -43,6 +43,11 @@ io.on('connection', function (socket) {
         board.lngChange(data);
     });
 
+    socket.on('pingAll', function(){
+        console.log('update pingAll');
+        board.pingAll();
+    });
+
     socket.emit('soundList', soundList);
     socket.emit('lngList', lngList);
 

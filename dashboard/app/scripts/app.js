@@ -100,6 +100,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       sonar.right = data.sonar[2];
     });
 
+    document.addEventListener('keyup', function(e){
+      if(e.keyCode === 85){
+        console.log('pingAll');
+        socket.emit('pingAll');
+      }
+    });
   });
 
   // Main area's paper-scroll-header-panel custom condensing transformation of
