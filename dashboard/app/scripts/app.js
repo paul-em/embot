@@ -47,6 +47,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       socket.emit('steer', data.detail);
     });
 
+    var lipo = document.querySelector('embot-lipo');
     var sonar = document.querySelector('embot-sonar');
     sonar.left = 31;
     sonar.center = 200;
@@ -94,10 +95,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     socket.on('data', function (data) {
-      console.log('got data', data.sonar);
+      console.log('got data', data);
       sonar.left = data.sonar[0];
       sonar.center = data.sonar[1];
       sonar.right = data.sonar[2];
+
+      lipo.first = data.lipo[0];
+      lipo.second = data.lipo[1];
+      lipo.third = data.lipo[2];
     });
 
     document.addEventListener('keyup', function(e){

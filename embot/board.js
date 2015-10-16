@@ -36,6 +36,24 @@ var results = [];
 var pingData = [];
 var unChanged = 0;
 
+var lipoR = [
+    {
+        R2: 10,
+        R1: 3
+    },
+    {
+        R2: 10,
+        R1: 20
+    },
+    {
+        R2: 10,
+        R1: 30
+    }
+];
+var lipoCorrection = 1.038;
+var lipo = [];
+var lipoRaw = [];
+
 var SIDES = [LEFT, CENTER, RIGHT];
 
 var soundTimeout = setTimeout(function () {
@@ -62,7 +80,7 @@ board.on("ready", function () {
     ready = true;
     leftMotor = new five.Motor(motorConfigs.M1);
     rightMotor = new five.Motor(motorConfigs.M2);
-
+    /*
     this.pinMode(0, five.Pin.ANALOG);
     this.pinMode(1, five.Pin.ANALOG);
     this.pinMode(2, five.Pin.ANALOG);
@@ -82,6 +100,18 @@ board.on("ready", function () {
 
     this.analogRead(3, function (voltage) {
         encoderUpdate(RIGHT, B, voltage > 500);
+    });*/
+
+    this.analogRead(1, function (voltage) {
+        calcVolt(0, voltage);
+    });
+
+    this.analogRead(2, function (voltage) {
+        calcVolt(1, voltage);
+    });
+
+    this.analogRead(3, function (voltage) {
+        calcVolt(2, voltage);
     });
 
     this.analogRead(4, function (voltage) {
@@ -229,6 +259,24 @@ function ping(pin) {
     });
 }
 
+function calcVolt(cell, voltage){
+    voltage = 5 * (voltage / 1023);
+    if(!lipoRaw[cell] || Math.abs(lipoRaw[cell] - voltage) > 0.01){
+        lipoRaw[cell] = voltage;
+        lipo[cell] = (voltage / (lipoR[cell].R2 / (lipoR[cell].R1 + lipoR[cell].R2))) * lipoCorrection;
+        if(cell === 1){
+            lipo[1] = lipo[1] - lipo[0];
+        }
+        if(cell === 2){
+            lipo[2] = lipo[2] - lipo[0] - lipo[1];
+        }
+        lipo[cell] = Math.round(lipo[cell] * 100) / 100;
+        if(lipo[cell] < 3.5){
+            play('03', lang);
+        }
+    }
+}
+
 function go(left, right) {
     if (sendingPing) {
         setTimeout(function () {
@@ -251,7 +299,7 @@ function go(left, right) {
         } else {
             rightMotor.forward(right);
         }
-    } else if (!button1) {
+    } else if (!button1  && leftMotor && rightMotor) {
         leftMotor.stop();
         rightMotor.stop();
     }
@@ -274,7 +322,8 @@ exports.lngChange = function (lng) {
 
 exports.getData = function () {
     return {
-        sonar: pingData
+        sonar: pingData,
+        lipo: lipo
     };
 };
 
