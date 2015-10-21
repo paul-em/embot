@@ -75,9 +75,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <span>Home</span>
           </a>
 
-          <a data-route="users" href="/sounds">
+          <a data-route="sounds" href="/sounds">
             <iron-icon icon="av:volume-up"></iron-icon>
             <span>Sounds</span>
+          </a>
+
+          <a data-route="cam" href="/cam">
+            <iron-icon icon="av:videocam"></iron-icon>
+            <span>Cam</span>
           </a>
         </paper-menu>
       </paper-scroll-header-panel>
@@ -137,6 +142,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </paper-material>
             </section>
 
+            <section data-route="cam">
+              <paper-material elevation="1">
+                <h2 class="paper-font-display2">Cam</h2>
+                <embot-cam></embot-cam>
+              </paper-material>
+            </section>
           </iron-pages>
         </div>
       </paper-scroll-header-panel>
