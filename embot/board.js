@@ -3,9 +3,12 @@ var lang = 'en';
 
 var button1 = false; // drive
 var button2 = false; // auto
+var checkBattery = false;
 
 var five = require("johnny-five");
 var play = require('./play');
+
+
 var board = new five.Board();
 var that;
 var ready = false;
@@ -79,7 +82,10 @@ board.on("ready", function () {
 
     ready = true;
     leftMotor = new five.Motor(motorConfigs.M1);
-    rightMotor = new five.Motor(motorConfigs.M2);
+    rightMotor = new five.Motor(motorConfigs.M3);
+
+
+
     /*
     this.pinMode(0, five.Pin.ANALOG);
     this.pinMode(1, five.Pin.ANALOG);
@@ -260,6 +266,9 @@ function ping(pin) {
 }
 
 function calcVolt(cell, voltage){
+    if(!checkBattery){
+        return;
+    }
     voltage = 5 * (voltage / 1023);
     if(!lipoRaw[cell] || Math.abs(lipoRaw[cell] - voltage) > 0.01){
         lipoRaw[cell] = voltage;

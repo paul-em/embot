@@ -6,6 +6,8 @@ var path = require('path');
 var board = require('./board');
 var play = require('./play');
 var fs = require('fs');
+var cam = require('./cam');
+var connected = [];
 
 var rawlngList = fs.readdirSync(path.join(__dirname, '/sounds'));
 var lngList = [];
@@ -25,6 +27,9 @@ app.get('/', function (req, res) {
 
 io.on('connection', function (socket) {
     console.log('a user connected');
+    cam.start();
+    connected.push(socket);
+    console.log(socket.id);
     var dataInterval;
     socket.on('steer', function (data) {
         board.steer(data);
@@ -37,6 +42,23 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         console.log('a user disconnected');
         clearInterval(dataInterval);
+        for(var i = 0; i < connected.length; i++){
+            if(connected[i].id === socket.id){
+                connected.splice(i, 1);
+                console.log('deleted', connected.length);
+            }
+        }
+        if(connected.length === 0){
+            cam.stop();
+        }
+    });
+
+    socket.on('changeCam', function(data){
+        if(data){
+            cam.start();
+        } else {
+            cam.stop();
+        }
     });
 
     socket.on('changeLng', function(data){

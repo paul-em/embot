@@ -40,7 +40,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     };*/
     var socket = io.connect(); // jshint ignore:line
-
+    var cam = document.querySelector('embot-cam');
+    cam.addEventListener('enabledChanged', function(){
+      console.log('enabledChanged');
+      socket.emit('changeCam', cam.enabled);
+    });
 
     var steerCtrl = document.querySelector('embot-steer-control');
     steerCtrl.addEventListener('action', function(data){

@@ -16,7 +16,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
   </style>
   <template>
-      <img id="pic" src="/images/cam.jpeg">
+      <!--<img id="pic" src="/images/cam.jpeg">-->
+    <paper-checkbox checked="{{enabled}}">enabled</paper-checkbox>
+    <img id="cam" src="">
   </template>
 </dom-module>
 
@@ -26,13 +28,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       is: 'embot-cam',
 
       properties: {
-
+        enabled: {
+          type: Boolean,
+          value: true,
+          observer: '_change'
+        }
       },
       ready: function(){
-        var pic = this.$.pic;
-        setInterval(function(){
-          pic.src = '/images/cam.jpeg?t=' + Date.now();
-        }, 1000);
+        var that = this;
+        setTimeout(function(){
+          that.$.cam.src = 'http://192.168.0.1:8081/';
+        }, 500);
+      },
+      _change: function(){
+        console.log('change!');
+        this.fire('enabledChanged');
+        var that = this;
+        if(this.enabled){
+          setTimeout(function(){
+            that.$.cam.src = 'http://192.168.0.1:8081/';
+          }, 500);
+        }
       }
     });
   })();
