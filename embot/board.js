@@ -3,7 +3,7 @@ var lang = 'en';
 
 var button1 = false; // drive
 var button2 = false; // auto
-var checkBattery = false;
+var checkBattery = true;
 
 var five = require("johnny-five");
 var play = require('./play');
@@ -127,18 +127,18 @@ board.on("ready", function () {
             }
             button1 = false;
             button2 = false;
-        } else if (voltage < 100) {
+        } else if (voltage < 700) {
             if (button1 && !button2) {
                 return;
             }
             button1 = true;
             button2 = false;
-        } else if (voltage < 162) {
+      /*  } else if (voltage < 162) {
             if (!button1 && button2) {
                 return;
             }
             button1 = false;
-            button2 = true;
+            button2 = true; */
         } else {
             if (button1 && button2) {
                 return;
@@ -247,9 +247,9 @@ function encoderUpdate(side, output, on) {
 
 function pingAll() {
     return Promise.all([
-        ping(5),
-        ping(2),
-        ping(6)
+        ping(15),
+        ping(16),
+        ping(14)
     ]);
 }
 

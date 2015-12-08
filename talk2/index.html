@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Robots talk JavaScript</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Robots talk JavaScript</h1>
+					<p>
+						<small>Created by <a href="http://paulem.eu">Paul Emathigner</a> / <a href="http://twitter.com/hakimel">@_paulem</a></small>
+					</p>
+				</section>
+
+				<section>
+					<h2>About</h2>
+					<p>No hardware background</p>
+					<p>Web Dev - love JS</p>
+					<p>Arduino workshop</p>
+				</section>
+
+
+
+				<section>
+					<h2>Arduino</h2>
+					<p>since 2005</p>
+					<p>actually called Geniuno outside the US</p>
+					<p>Software + Hardware (Microcontroller)</p>
+					<p>Open Source</p>
+					<p>simplified C</p>
+				</section>
+
+				<section>
+					<img src="img/uno.jpg">
+					<p>~20 Euro</p>
+				</section>
+
+				<section>
+					<img src="img/ide.png">
+				</section>
+
+				<section>
+					<h2>What is it good for?</h2>
+					<p>Reading sensor data</p>
+					<p>Controlling Motors</p>
+					<p>LEDs</p>
+					<p>Talking to other controllers</p>
+					<p>...</p>
+					<p>IOT / home automation</p>
+				</section>
+
+				<section>
+					<img src="img/sgier-johnny-five.png">
+				</section>
+				<section>
+					<h2>Johnny Five</h2>
+					<p>JavaScript Robotics programming framework</p>
+					<p>Rick Waldron - Bocoup - 2012</p>
+				</section>
+
+				<section>
+					<h2>Platform Support</h2>
+					<img src="img/support.png">
+				</section>
+
+				<section>
+					<h2>How?</h2>
+					<img width="100%" src="img/urkel.gif">
+				</section>
+
+				<section>
+					<h2>Firmata Protocol</h2>
+					<p>Generic protocol for communicating with microcontrollers</p>
+					<p>Not only usable for JS (Python, Ruby, Clojure, Java, PHP, ...)</p>
+					<p>Flash the firmware - done</p>
+				</section>
+
+				<section>
+					<h2>But why?</h2>
+					<img src="img/why.jpg">
+				</section>
+
+				<section>
+					<h2>JavaScript vs C++</h2>
+					<p>async vs sync</p>
+					<p>event-driven vs loop</p>
+				</section>
+
+				<section>
+					<h2>Native vs External</h2>
+					<p>No code length limitations (32KB on UNO)</p>
+					<p>Better extensibility with USB ports etc.</p>
+				</section>
+
+				<section>
+					<h2>Drawbacks</h2>
+					<p>Obviously 2nd device</p>
+					<p>Some async code still works sync</p>
+					<p>Performance?</p>
+				</section>
+
+				<section>
+					<h2>Example Code</h2>
+					<pre><code class="hljs" data-trim contenteditable>
+var five = require("johnny-five");
+var board = new five.Board();
+
+board.on("ready", function() {
+  var proximity = new five.Proximity({
+    controller: "HCSR04",
+    pin: 7
+  });
+
+  proximity.on("data", function() {
+    console.log(this.cm + "cm", this.in + "in");
+  });
+
+  proximity.on("change", function() {
+    console.log("The obstruction has moved.");
+  });
+});
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Robo time!</h2>
+				</section>
+
+				<section style="text-align: left;">
+					<h1>THE END</h1>
+					<img src="img/beer_pcu.gif">
+					<p>
+						- Check out: <a href="http://johnny-five.io/">johnny-five.io</a> <br>
+						- DevLoL AUG: <a href="https://devlol.org/wiki/ArduinoUserGroup">devlol.org/wiki/ArduinoUserGroup</a> <br>
+						- Slides: <a href="https://paulem.eu/~/slides/johnny-five">paulem.eu/~/slides/johnny-five</a>
+					</p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
